@@ -2,11 +2,14 @@ package com.example.minorproject1.service;
 
 import com.example.minorproject1.dto.CreateStudentRequest;
 import com.example.minorproject1.dto.UpdateStudentResponse;
-import com.example.minorproject1.model.Book;
+import com.example.minorproject1.model.SecuredUser;
 import com.example.minorproject1.model.Student;
+import com.example.minorproject1.repository.SecuredUserRepository;
 import com.example.minorproject1.repository.StudentRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,8 +20,29 @@ public class StudentService {
     @Autowired
     StudentRepository studentRepository;
 
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    SecuredUserService securedUserService;
+
+    @Value("${student.authorities}")
+    String authorities;
+
     public Student create(CreateStudentRequest createStudentRequest) {
         Student student = createStudentRequest.to();
+
+        SecuredUser securedUser = student.getSecuredUser();
+        securedUser.setPassword(passwordEncoder.encode(securedUser.getPassword()));
+        securedUser.setAuthorities(authorities);
+
+        //created a user
+        securedUser = securedUserService.save(securedUser);
+
+        //create a student
+        student.setSecuredUser(securedUser);
+
         return studentRepository.save(student);
     }
 
@@ -32,6 +56,7 @@ public class StudentService {
 
         if(student!=null && student.getBookList().size()==0){
             studentRepository.deleteById(id);
+            securedUserService.deleteById(student.getSecuredUser().getId());
             return student;
         }
         else{

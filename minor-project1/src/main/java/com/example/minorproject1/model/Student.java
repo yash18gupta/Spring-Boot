@@ -24,11 +24,9 @@ public class Student {
     private String contact;
 
     @OneToMany(mappedBy = "student",cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<Book> bookList;
 
     @OneToMany(mappedBy = "student",cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<Transaction> transactionList;
 
     @CreationTimestamp
@@ -38,4 +36,8 @@ public class Student {
     private Date updatedOn;
 
     private Date validity;
+
+    @OneToOne
+    @JoinColumn
+    private SecuredUser securedUser;
 }

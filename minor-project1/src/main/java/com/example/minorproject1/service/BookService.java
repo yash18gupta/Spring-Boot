@@ -1,5 +1,6 @@
 package com.example.minorproject1.service;
 
+import com.example.minorproject1.dto.BookFrontend;
 import com.example.minorproject1.dto.CreateBookRequest;
 import com.example.minorproject1.model.Author;
 import com.example.minorproject1.model.Book;
@@ -10,9 +11,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -33,7 +33,7 @@ public class BookService {
     }
 
     public List<Book> getAll() {
-        return bookRepository.findAll();
+        return bookRepository.getAvailableBook();
     }
 
     @Transactional
@@ -76,5 +76,33 @@ public class BookService {
 
     public Book getBookById(int id) {
         return bookRepository.findById(id).orElse(null);
+    }
+
+    public List<BookFrontend> showBooks() {
+        List<Book> availableBooks = bookRepository.getAvailableBook();
+
+
+        Map<String,Integer> bookCountMap = new HashMap<>();
+        Set<Book> uniqueBooks = new HashSet<>();
+
+        for(Book b:availableBooks){
+            String bookName = b.getName();
+            bookCountMap.put(bookName,bookCountMap.getOrDefault(bookName, 0) + 1);
+            uniqueBooks.add(b);
+        }
+        System.out.println(uniqueBooks.size());
+
+        List<BookFrontend> responseList =  uniqueBooks.stream()
+                .map(book -> BookFrontend.builder()
+                        .name(book.getName())
+                        .genre(book.getGenre())
+                        .pages(book.getPages())
+                        .authorName(book.getAuthor().getName())
+                        .count(bookCountMap.getOrDefault(book.getName(),0))
+                        .build())
+                        .toList();
+
+        return responseList;
+
     }
 }

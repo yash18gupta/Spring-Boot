@@ -31,6 +31,5 @@ public class Author {
     private Date addedOn;
 
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<Book> bookList;
 }

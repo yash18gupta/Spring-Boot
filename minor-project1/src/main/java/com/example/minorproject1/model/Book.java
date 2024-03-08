@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -29,14 +30,15 @@ public class Book {
 
     @ManyToOne
     @JoinColumn
+    @JsonIgnore
     private Author author;
 
     @OneToMany(mappedBy = "book",cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<Transaction> transactionList;
 
     @ManyToOne
     @JoinColumn
+    @JsonIgnore
     private Student student;
 
     @CreationTimestamp
@@ -44,4 +46,17 @@ public class Book {
 
     @UpdateTimestamp
     private Date updatedOn;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return Objects.equals(name, book.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }

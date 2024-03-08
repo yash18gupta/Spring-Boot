@@ -39,4 +39,8 @@ public interface BookRepository extends JpaRepository<Book,Integer> {
     @Transactional // for updating any data
     @Query("update Book b set b.student = null where b.id = ?1 ")
     void unassignBook(int bookId);
+
+    @Query("SELECT b FROM Book b where b.student IS NULL")
+    List<Book> getAvailableBook();
+
 }

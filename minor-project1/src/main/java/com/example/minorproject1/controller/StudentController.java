@@ -3,10 +3,14 @@ package com.example.minorproject1.controller;
 import com.example.minorproject1.dto.CreateStudentRequest;
 import com.example.minorproject1.dto.UpdateStudentResponse;
 import com.example.minorproject1.model.Book;
+import com.example.minorproject1.model.SecuredUser;
 import com.example.minorproject1.model.Student;
 import com.example.minorproject1.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,23 +28,46 @@ public class StudentController {
     }
 
     @GetMapping("/get/{id}")
-    public Student getStudent(@PathVariable int id){
+    @PreAuthorize("hasAuthority('admin')")
+    public Student getStudentforAdmin(@PathVariable int id){
         return studentService.getStudent(id);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public Student deleteStudentById(@PathVariable int id) throws Exception {
-        return studentService.deleteStudentById(id);
+    @GetMapping("/details")
+    @PreAuthorize("hasAuthority('student')")
+    public Student getStudent(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecuredUser securedUser = (SecuredUser) authentication.getPrincipal();
+        int studentId = securedUser.getStudent().getId();
+
+        return studentService.getStudent(studentId);
+    }
+
+    @DeleteMapping("/delete")
+    @PreAuthorize("hasAuthority('student')")
+    public Student deleteStudentById() throws Exception {
+
+        System.out.println("Deleting!!!");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecuredUser securedUser = (SecuredUser) authentication.getPrincipal();
+        int studentId = securedUser.getStudent().getId();
+        return studentService.deleteStudentById(studentId);
     }
 
     @GetMapping("/getAll")
-    public List<Student> getAllBooks(){
+    @PreAuthorize("hasAuthority('admin')")
+    public List<Student> getAllStudents(){
         return studentService.getAll();
     }
 
-    @PutMapping("/update/{id}")
-    public Student updateStudent(@PathVariable int id, @RequestBody @Valid UpdateStudentResponse updateStudentResponse) throws Exception {
-        return studentService.updateStudent(id,updateStudentResponse);
+    @PutMapping("/update")
+    @PreAuthorize("hasAuthority('student')")
+    public Student updateStudent(@RequestBody @Valid UpdateStudentResponse updateStudentResponse) throws Exception {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecuredUser securedUser = (SecuredUser) authentication.getPrincipal();
+        int studentId = securedUser.getStudent().getId();
+        return studentService.updateStudent(studentId,updateStudentResponse);
     }
 
 }

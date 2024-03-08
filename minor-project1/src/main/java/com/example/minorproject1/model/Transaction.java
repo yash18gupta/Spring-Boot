@@ -2,6 +2,7 @@ package com.example.minorproject1.model;
 
 import com.example.minorproject1.model.enums.TransactionStatus;
 import com.example.minorproject1.model.enums.TransactionType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,10 +38,12 @@ public class Transaction {
     
     @ManyToOne
     @JoinColumn
+    @JsonIgnore
     private Student student;
     
     @ManyToOne
     @JoinColumn
+    @JsonIgnore
     private Book book;
 
     private Double fine;
